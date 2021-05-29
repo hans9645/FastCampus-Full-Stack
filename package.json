@@ -1,0 +1,27 @@
+{
+  "name": "fastcrawling",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hans9645/FastCampus_crawling.git"
+  },
+  "keywords": [
+    "crawling"
+  ],
+  "author": "divertome",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hans9645/FastCampus_crawling/issues"
+  },
+  "homepage": "https://github.com/hans9645/FastCampus_crawling#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "*",
+    "puppeteer": "^9.1.1"
+  }
+}
