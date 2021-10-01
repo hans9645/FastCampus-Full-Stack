@@ -1,1 +1,0 @@
-  await page.screenshot({ path: 'brunch.png' });
