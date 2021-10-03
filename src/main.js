@@ -9,7 +9,7 @@
 /* eslint-disable-next-line no-console*/
 
 const http = require('http')
-const { routes } = require('./api.js')
+const { routes } = require('./api')
 
 /**
  * GET /posts
@@ -56,7 +56,7 @@ const server = http.createServer((req, res) => {
         }))) ||
       undefined
 
-    //console.log(reqbody)
+    console.log(reqbody)
 
     const result = await route.callback(regexResult, reqbody)
     res.statusCode = result.statusCode

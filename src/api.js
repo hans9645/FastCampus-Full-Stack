@@ -7,21 +7,31 @@
  * @property {string} content
  */
 
+const fs = require('fs')
+const DB_JSON_FILENAME = 'database.json'
+
+/** @returns {Promise<Post[]>} */
+async function getPosts() {
+  const json = await fs.promises.readFile(DB_JSON_FILENAME, 'utf-8')
+  return JSON.parse(json).posts
+}
+
+/**
+ * @param {Post[]} posts
+ */
+async function savePosts(posts) {
+  const content = {
+    posts,
+  }
+  await fs.promises.writeFile(
+    DB_JSON_FILENAME,
+    JSON.stringify(content),
+    'utf-8'
+  )
+}
 /**
  * @type {Post[]}
  */
-const posts = [
-  {
-    id: 'my_first_post',
-    title: 'my first post',
-    content: 'first Hello!',
-  },
-  {
-    id: 'my_second_post',
-    title: 'my second post',
-    content: 'second Hello!',
-  },
-]
 
 /**
  * GET /posts
@@ -50,7 +60,7 @@ const routes = [
     callback: async () => ({
       //TODO:implement
       statusCode: 200,
-      body: posts,
+      body: await getPosts(),
     }),
   },
   {
@@ -64,7 +74,7 @@ const routes = [
           body: 'Not found',
         }
       }
-
+      const posts = await getPosts()
       const post = posts.find((_post) => _post.id === postID)
 
       if (!post) {
@@ -91,6 +101,7 @@ const routes = [
           body: 'Ill-formed request.',
         }
       }
+      const posts = await getPosts()
 
       /** @type {string} */
       const title = body.title
@@ -100,6 +111,7 @@ const routes = [
         content: body.content,
       }
       posts.push(newPost)
+      savePosts(posts)
 
       return {
         statusCode: 200,
