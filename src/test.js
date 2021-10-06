@@ -30,8 +30,12 @@ console.log(results)
 
 // promise style
 async function main() {
-  const result = await fs.promises.readFile(FILENAME, 'utf-8')
-  console.log(result)
+  try {
+    const result = await fs.promises.readFile(FILENAME, 'utf-8')
+    console.log(result)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 main()
