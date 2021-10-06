@@ -35,3 +35,13 @@ async function main() {
 }
 
 main()
+
+//만일 node 구버전 사용으로 promise를 사용할 수 없을 때 사용하는 법은 아래와 같다.
+const util = require('util')
+
+async function main2() {
+  const result = await util.promisify(fs.readFile)(FILENAME, 'utf-8')
+  console.log(result)
+}
+
+main2()
