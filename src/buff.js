@@ -20,8 +20,25 @@
 // console.log(process.argv)
 //명령줄 인자를 파싱해서 출력시킨다.
 
-const dns = require('dns')
+// const dns = require('dns')
 
-dns.lookup('google.com', (err, address, family) => {
-  console.log('address %j family IPv%s', address, family)
-})
+// dns.lookup('google.com', (err, address, family) => {
+//   console.log('address %j family IPv%s', address, family)
+// })
+
+// const os = require('os')
+// console.log(
+//   ['arch', os.arch()],
+//   ['freeman', os.freemem()],
+//   ['platform', os.platform()],
+//   ['cpus', os.cpus()]
+// )
+
+const path = require('path')
+const fs = require('fs')
+
+const filepath = path.resolve(__dirname, './test.js')
+console.log('filepath', filepath)
+
+const filecontent = fs.readFileSync(filepath, 'utf-8')
+console.log(filecontent)
