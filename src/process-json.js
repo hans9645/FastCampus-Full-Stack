@@ -4,38 +4,52 @@ const { log } = console
 
 const fs = require('fs')
 const { type } = require('os')
+const { HighlightSpanKind } = require('typescript')
 
-const rs = fs.createReadStream('local/jsons', {
-  encoding: 'utf-8',
-  highWaterMark: 6,
-})
+/**@param {number} highWaterMark*/
+function processJson(highWaterMark) {
+  const rs = fs.createReadStream('local/jsons', {
+    encoding: 'utf-8',
+    highWaterMark,
+  })
 
-let totalsum = 0
+  let totalsum = 0
 
-let accumulatedJsonStr = ''
+  let accumulatedJsonStr = ''
 
-rs.on('data', (chunk) => {
-  log('Event: data', chunk)
+  rs.on('data', (chunk) => {
+    log('Event: data', chunk)
 
-  if (typeof chunk !== 'string') {
-    return
-  }
+    if (typeof chunk !== 'string') {
+      return
+    }
 
-  totalsum += chunk
-    .split('\n')
-    .map((jsonline) => {
-      try {
-        return JSON.parse(jsonline)
-      } catch {
-        return undefined
-      }
-    })
-    .filter((json) => json)
-    .map((json) => json.data)
-    .reduce((sum, curr) => sum + curr, 0)
-})
+    accumulatedJsonStr += chunk
+    const lastNewlineIdx = accumulatedJsonStr.lastIndexOf('\n')
+    const jsonLinesStr = accumulatedJsonStr.substring(0, lastNewlineIdx) // \n을 포함한 line들
+    accumulatedJsonStr = accumulatedJsonStr.substring(lastNewlineIdx) // 남은 뒷부분
 
-rs.on('end', () => {
-  log('Event: end')
-  log('totalsum', totalsum)
-})
+    totalsum += jsonLinesStr
+      .split('\n')
+      .map((jsonline) => {
+        try {
+          return JSON.parse(jsonline)
+        } catch {
+          return undefined
+        }
+      })
+      .filter((json) => json)
+      .map((json) => json.data)
+      .reduce((sum, curr) => sum + curr, 0)
+  })
+
+  rs.on('end', () => {
+    log('Event: end')
+    log('totalsum', totalsum)
+  })
+}
+
+// highWaterMark가 어떠한 크기에도 잘 작동하는지 테스트 하기 위해
+for (let watermark = 1; watermark < 50; watermark++) {
+  processJson(watermark)
+}
