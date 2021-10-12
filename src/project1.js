@@ -15,21 +15,43 @@ const https = require('https')
 
 const GOTAPI_PREFIX = 'https://game-of-thrones-quotes.herokuapp.com/v1'
 
-/** @returns {Promise<House[]>} */
-async function getHouse() {
-  //가문들의 정보를 받아오는 코드
-  return new Promise((resolve) => {
-    https.get(`${GOTAPI_PREFIX}/houses`, (res) => {
+/**
+ * @param {string} url
+ * @returns { Promise<*> }
+ */
+async function getHttpsJson(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
       let jsonStr = ''
       res.setEncoding('utf-8')
       res.on('data', (data) => {
         jsonStr += data
       })
       res.on('end', () => {
-        resolve(JSON.parse(jsonStr))
+        try {
+          const parsed = JSON.parse(jsonStr)
+          resolve(parsed)
+        } catch {
+          reject(new Error('The server response is not valid JSON document.'))
+        }
       })
     })
   })
+}
+
+/** @returns {Promise<House[]>} */
+async function getHouse() {
+  //가문들의 정보를 받아오는 코드
+  return getHttpsJson(`${GOTAPI_PREFIX}/houses`)
+}
+
+// 'sanitize'는 들어가서는 안되는 문자열을 걸러내는 함수명으로 자주 사용됨.
+/**
+ * @param {string} quote
+ * @returns {string}
+ */
+function sanitizeQuote(quote) {
+  return quote.replace(/[^a-zA-Z0-9,.]/g, ' ')
 }
 
 /**
@@ -38,34 +60,26 @@ async function getHouse() {
  * @returns {Promise<string>}
  */
 async function getMergedQuotesOfCharacter(slug) {
-  return new Promise((resolve) => {
-    https.get(`${GOTAPI_PREFIX}/character/${slug}`, (res) => {
-      let jsonStr = ''
-      res.setEncoding('utf-8')
-      res.on('data', (data) => {
-        jsonStr += data
-      })
-      res.on('end', () => {
-        const json = JSON.parse(jsonStr)
-        const mergedQuotes = json[0].quotes
-          .join(' ')
-          .replace(/[^a-zA-Z0-9]/g, ' ')
-        resolve(mergedQuotes)
-      })
-    })
-  })
+  const character = await getHttpsJson(`${GOTAPI_PREFIX}/character/${slug}`)
+  return sanitizeQuote(character[0].quotes.join(' '))
 }
 
 async function main() {
   const houses = await getHouse()
-  houses.forEach((house) => {
-    house.members.forEach((member) => {
-      getMergedQuotesOfCharacter(member.slug).then((quotes) => {
-        console.log(house.slug, member.slug, quotes, '\n')
-      })
-    })
-  })
-  //console.log(houses)
+
+  const result = await Promise.all(
+    houses
+      .map((house) =>
+        house.members.map((member) => ({
+          house: house.slug,
+          member: member.slug,
+          quote: getMergedQuotesOfCharacter(member.slug),
+        }))
+      )
+      .flat()
+  )
+
+  console.log(result)
 }
 
 main()

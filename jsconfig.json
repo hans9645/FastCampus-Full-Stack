@@ -1,4 +1,4 @@
 {
-  "compilerOptions": { "strict": true },
+  "compilerOptions": { "strict": true, "target": "es2019" },
   "include": ["src/**/*"]
 }
