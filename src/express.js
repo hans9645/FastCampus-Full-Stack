@@ -10,6 +10,9 @@ const userRouter = express.Router()
 const PORT = 5000
 
 app.use(express.json())
+app.use('/public', express.static('src/public'))
+app.set('views', 'src/views')
+app.set('view engine', 'pug')
 
 userRouter.get('/', (req, res) => {
   console.log('user list')
@@ -19,6 +22,9 @@ const USER = {
   15: {
     nickname: 'foo',
   },
+  16: {
+    nickname: 'var',
+  },
 }
 userRouter.param('id', (req, res, next, value) => {
   console.log(`id parameter`, value)
@@ -27,9 +33,17 @@ userRouter.param('id', (req, res, next, value) => {
   next()
 })
 userRouter.get('/:id', (req, res) => {
-  console.log('user info with ID')
-  // @ts-ignore
-  res.send(req.user)
+  const resMimeType = req.accepts(['json', 'html'])
+
+  if (resMimeType === 'json') {
+    // @ts-ignore
+    res.send(req.user)
+  } else if (resMimeType === 'html') {
+    res.render('user-profile', {
+      //@ts-ignore
+      nickname: req.user.nickname,
+    })
+  }
 })
 
 userRouter.post('/:id/nickname', (req, res) => {
