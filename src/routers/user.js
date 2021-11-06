@@ -33,7 +33,7 @@ router.param('id', async (req, res, next, value) => {
       throw err
     }
     // @ts-ignore
-    req.user = USER[value]
+    req.user = USERS[value]
     next()
   } catch (err) {
     next(err)
@@ -41,6 +41,8 @@ router.param('id', async (req, res, next, value) => {
 })
 router.get('/:id', (req, res) => {
   const resMimeType = req.accepts(['json', 'html'])
+  // @ts-ignore
+  //console.log(req.user.nickname)
 
   if (resMimeType === 'json') {
     // @ts-ignore
@@ -50,6 +52,8 @@ router.get('/:id', (req, res) => {
       //@ts-ignore
       nickname: req.user.nickname,
     })
+    // @ts-ignore
+    res.send(req.user.nickname)
   }
 })
 
